@@ -28,35 +28,76 @@ describe('app routes', () => {
       return client.end(done);
     });
 
-    test('returns animals', async() => {
+    test('returns cars', async() => {
 
-      const expectation = [
+      const cars = [
         {
-          'id': 1,
-          'name': 'bessie',
-          'cool_factor': 3,
-          'owner_id': 1
+          make: 'Tesla',
+          model: 'Model 3',
+          releaseYear: 2017,
+          stillProduced: true,
+          energyType: 'electric'
         },
         {
-          'id': 2,
-          'name': 'jumpy',
-          'cool_factor': 4,
-          'owner_id': 1
+          make: 'Ford',
+          model: 'Mustang',
+          releaseYear: 1964,
+          stillProduced: true,
+          energyType: 'gas'
         },
         {
-          'id': 3,
-          'name': 'spot',
-          'cool_factor': 10,
-          'owner_id': 1
+          make: 'Mazda',
+          model: 'Mazda3',
+          releaseYear: 2003,
+          stillProduced: true,
+          energyType: 'gas'
+        },
+        {
+          make: 'Mazda',
+          model: 'Miata',
+          releaseYear: 1989,
+          stillProduced: true,
+          energyType: 'gas'
+        },
+        {
+          make: 'Toyota',
+          model: 'Prius',
+          releaseYear: 1997,
+          stillProduced: true,
+          energyType: 'hybrid'
         }
       ];
 
       const data = await fakeRequest(app)
-        .get('/animals')
+        .get('/cars')
         .expect('Content-Type', /json/)
         .expect(200);
 
-      expect(data.body).toEqual(expectation);
+      //Tests if the returned data is correct, without
+      //failing if there are extra properties on the objects
+      expect(data.body).toEqual(
+        cars.map(car => expect.objectContaining(car))
+      );
+    });
+
+    test('returns a car by id', async() => {
+
+      const expectation = {
+        make: 'Tesla',
+        model: 'Model 3',
+        releaseYear: 2017,
+        stillProduced: true,
+        energyType: 'electric'
+      };
+
+      const data = await fakeRequest(app)
+        .get('/cars/1')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      //Tests if the returned data is correct, without
+      //failing if there are extra properties on the object
+      expect(data.body).toEqual(expect.objectContaining(expectation));
     });
   });
 });
