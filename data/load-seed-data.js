@@ -1,10 +1,19 @@
 const client = require('../lib/client');
 // import our seed data:
 const cars = require('./cars.js');
+const categories = require('./categories.js');
 const usersData = require('./users.js');
 const { getEmoji } = require('../lib/emoji.js');
 
 run();
+
+async function getCategoryId(categoryName) {
+  const data = await client.query(`
+      SELECT * FROM categories
+      WHERE name=$1
+    `, [categoryName]);
+  return data.rows[0].id;
+}
 
 async function run() {
 
@@ -25,12 +34,23 @@ async function run() {
     const user = users[0].rows[0];
 
     await Promise.all(
-      cars.map(car => {
+      categories.map(category => {
         return client.query(`
-                    INSERT INTO cars (make, model, "releaseYear", "stillProduced", "energyType", owner_id)
-                    VALUES ($1, $2, $3, $4, $5, $6);
+                    INSERT INTO categories (name)
+                    VALUES ($1);
                 `,
-        [car.make, car.model, car.releaseYear, car.stillProduced, car.energyType, user.id]);
+        [category.name]);
+      })
+    );
+
+    await Promise.all(
+      cars.map(async (car) => {
+        const categoryId = await getCategoryId(car.category);
+        return client.query(`
+                    INSERT INTO cars (make, model, "releaseYear", "stillProduced", "energyType", owner_id, category_id)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7);
+                `,
+        [car.make, car.model, car.releaseYear, car.stillProduced, car.energyType, user.id, categoryId]);
       })
     );
     
