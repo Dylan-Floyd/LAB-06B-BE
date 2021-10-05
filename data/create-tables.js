@@ -16,7 +16,11 @@ async function run() {
                     id SERIAL PRIMARY KEY,
                     email VARCHAR(256) NOT NULL,
                     hash VARCHAR(512) NOT NULL
-                );           
+                );
+                CREATE TABLE categories (
+                    id SERIAL PRIMARY KEY,
+                    name TEXT NOT NULL
+                );
                 CREATE TABLE cars (
                     id SERIAL PRIMARY KEY NOT NULL,
                     make TEXT NOT NULL,
@@ -24,8 +28,9 @@ async function run() {
                     "releaseYear" INTEGER NOT NULL,
                     "stillProduced" BOOLEAN NOT NULL,
                     "energyType" TEXT NOT NULL,
-                    owner_id INTEGER NOT NULL REFERENCES users(id)
-            );
+                    owner_id INTEGER NOT NULL REFERENCES users(id),
+                    category_id INTEGER NOT NULL REFERENCES categories(id)
+                );
         `);
 
     console.log('create tables complete', getEmoji(), getEmoji(), getEmoji());

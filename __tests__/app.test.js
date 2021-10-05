@@ -36,43 +36,49 @@ describe('app routes', () => {
           model: 'Model 3',
           releaseYear: 2017,
           stillProduced: true,
-          energyType: 'electric'
+          energyType: 'electric',
+          category_id: 3
         },
         {
           make: 'Ford',
           model: 'Mustang',
           releaseYear: 1964,
           stillProduced: true,
-          energyType: 'gas'
+          energyType: 'gas',
+          category_id: 1
         },
         {
           make: 'Mazda',
           model: 'Mazda3',
           releaseYear: 2003,
           stillProduced: true,
-          energyType: 'gas'
+          energyType: 'gas',
+          category_id: 3
         },
         {
           make: 'Mazda',
           model: 'Miata',
           releaseYear: 1989,
           stillProduced: true,
-          energyType: 'gas'
+          energyType: 'gas',
+          category_id: 2
         },
         {
           make: 'Toyota',
           model: 'Prius',
           releaseYear: 1997,
           stillProduced: true,
-          energyType: 'hybrid'
+          energyType: 'hybrid',
+          category_id: 3
         }
       ];
 
       const data = await fakeRequest(app)
-        .get('/cars')
+        .get('/cars/')
         .expect('Content-Type', /json/)
         .expect(200);
 
+      console.log(`cars from get: ${JSON.stringify(data.body)}`);
       //Tests if the returned data is correct, without
       //failing if there are extra properties on the objects
       expect(data.body).toEqual(
@@ -107,7 +113,8 @@ describe('app routes', () => {
         model: 'Cybertruck',
         releaseYear: 2024,
         stillProduced: false,
-        energyType: 'electric'
+        energyType: 'electric',
+        category_id: 1
       };
 
       const postResponse = await fakeRequest(app)
@@ -132,9 +139,10 @@ describe('app routes', () => {
       const modifiedCarData = {
         make: 'Tesla',
         model: 'Cybertruck',
-        releaseYear: 2024,
+        releaseYear: 2077,
         stillProduced: false,
-        energyType: 'electric'
+        energyType: 'electric',
+        category_id: 1
       };
 
       //make a put request to /cars/1
@@ -161,20 +169,24 @@ describe('app routes', () => {
 
       //get some car data to allow for checking if it has been deleted.
       const getResponse1 = await fakeRequest(app)
-        .get('/cars/1')
+        .get('/cars/4')
         .expect('Content-Type', /json/)
         .expect(200);
 
       const id1Car = await getResponse1.body;
+      delete id1Car.category; //Without this a join would be needed on the delete endpoint.
 
       //delete the car
       const deleteResponse = await fakeRequest(app)
-        .delete('/cars/1')
+        .delete('/cars/4')
         .expect('Content-Type', /json/)
         .expect(200);
 
+      const deleteBody = await deleteResponse.body;
+
+      console.log(JSON.stringify(id1Car));
       //check if the reponse contains the car we wanted to delete
-      expect(deleteResponse.body).toEqual(expect.objectContaining(id1Car));
+      expect(deleteBody).toEqual(expect.objectContaining(id1Car));
 
       //retrieve all car data
       const getResponse2 = await fakeRequest(app)
@@ -183,6 +195,70 @@ describe('app routes', () => {
         .expect(200);
 
       expect(getResponse2.body).not.toEqual(expect.arrayContaining([expect.objectContaining(id1Car)]));
+    });
+
+    test('get /categories/ returns all categories', async () => {
+
+      const expectation = [
+        {
+          id: expect.any(Number),
+          name: 'Sports Car'
+        },
+        {
+          id: expect.any(Number),
+          name: 'Roadster'
+        },
+        {
+          id: expect.any(Number),
+          name: 'Compact Car'
+        }
+      ];
+
+      const getResponse = await fakeRequest(app)
+        .get('/categories/')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      expect(getResponse.body).toEqual(expectation);
+    });
+
+    test('post /categories/ adds a new category', async () => {
+
+      const expectation = [
+        {
+          id: expect.any(Number),
+          name: 'Sports Car'
+        },
+        {
+          id: expect.any(Number),
+          name: 'Roadster'
+        },
+        {
+          id: expect.any(Number),
+          name: 'Compact Car'
+        },
+        {
+          id: expect.any(Number),
+          name: 'bob'
+        }
+      ];
+
+      const newCar = {
+        name: 'bob'
+      };
+
+      await fakeRequest(app)
+        .post('/categories/')
+        .send(newCar)
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      const getResponse = await fakeRequest(app)
+        .get('/categories/')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      expect(getResponse.body).toEqual(expectation);
     });
   });
 });
