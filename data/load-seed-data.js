@@ -47,10 +47,10 @@ async function run() {
       cars.map(async (car) => {
         const categoryId = await getCategoryId(car.category);
         return client.query(`
-                    INSERT INTO cars (make, model, "releaseYear", "stillProduced", "energyType", owner_id, category_id)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7);
+                    INSERT INTO cars (make, model, "releaseYear", "stillProduced", "energyType", owner_id, category_id, img)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
                 `,
-        [car.make, car.model, car.releaseYear, car.stillProduced, car.energyType, user.id, categoryId]);
+        [car.make, car.model, car.releaseYear, car.stillProduced, car.energyType, user.id, categoryId, car.img]);
       })
     );
     

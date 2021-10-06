@@ -29,7 +29,8 @@ async function run() {
                     "stillProduced" BOOLEAN NOT NULL,
                     "energyType" TEXT NOT NULL,
                     owner_id INTEGER NOT NULL REFERENCES users(id),
-                    category_id INTEGER NOT NULL REFERENCES categories(id)
+                    category_id INTEGER NOT NULL REFERENCES categories(id),
+                    img TEXT NOT NULL
                 );
         `);
 
